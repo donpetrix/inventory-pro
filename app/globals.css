@@ -1,0 +1,188 @@
+
+@import "tailwindcss";
+
+/* =========================================================
+   TAILWIND CSS v4
+   MANUAL DARK MODE
+   ========================================================= */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================================================
+   THEME VARIABLES
+   ========================================================= */
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+}
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+html {
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* =========================================================
+   FORM ELEMENTS
+   ========================================================= */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: #cbd5e1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Dark scrollbar */
+
+.dark ::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* =========================================================
+   TEXT SELECTION
+   ========================================================= */
+
+::selection {
+  background: rgb(99 102 241 / 0.25);
+  color: #312e81;
+}
+
+.dark ::selection {
+  background: rgb(139 92 246 / 0.3);
+  color: #ffffff;
+}
+/* InventoryPro Authentication - Dark Theme */
+.signin-page,
+.signup-page {
+  color: white;
+}
+
+/* Form text */
+.signin-page label,
+.signin-page p,
+.signin-page h1,
+.signin-page h2,
+.signin-page h3,
+.signup-page label,
+.signup-page p,
+.signup-page h1,
+.signup-page h2,
+.signup-page h3 {
+  color: white !important;
+}
+
+/* Links */
+.signin-page a,
+.signup-page a {
+  color: rgb(192 132 252) !important;
+}
+
+.signin-page a:hover,
+.signup-page a:hover {
+  color: rgb(216 180 254) !important;
+}
+
+/* Submit buttons */
+.signin-page button[type="submit"],
+.signup-page button[type="submit"] {
+  background: linear-gradient(
+          to right,
+          rgb(168 85 247),
+          rgb(217 70 239)
+  ) !important;
+
+  color: white !important;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+
+  transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          opacity 0.2s ease !important;
+}
+
+/* Hover */
+.signin-page button[type="submit"]:hover,
+.signup-page button[type="submit"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.3) !important;
+}
+
+/* Active */
+.signin-page button[type="submit"]:active,
+.signup-page button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* Disabled / Loading */
+.signin-page button[type="submit"]:disabled,
+.signup-page button[type="submit"]:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none !important;
+}
+/* Add Product Button Dark Mode*/
+
+/* Dark Mode */
+.dark .add-product-button {
+  background-color: #581c87;
+  color: #ffffff;
+}
+
+.dark .add-product-button:hover {
+  background-color: #6b21a8;
+}
+
