@@ -17,9 +17,7 @@ export default function Pagination({
   currentItems,
   onPageChange,
 }: PaginationProps) {
-  const getPageNumbers = () => {
-    const pages: (number | "...")[] = [];
-
+  const getPageNumbers = (): (number | "...")[] => {
     // Show every page when there are 7 or fewer
     if (totalPages <= 7) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -59,7 +57,10 @@ export default function Pagination({
 
   return (
     <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-      {/* Results */}
+      {/* =====================================================
+          RESULTS
+      ===================================================== */}
+
       <p className="text-xs text-slate-400">
         Showing{" "}
         <span className="font-semibold text-slate-600 dark:text-slate-300">
@@ -72,9 +73,15 @@ export default function Pagination({
         products
       </p>
 
-      {/* Pagination */}
+      {/* =====================================================
+          PAGINATION
+      ===================================================== */}
+
       <div className="flex items-center gap-1">
-        {/* Previous */}
+        {/* =================================================
+            PREVIOUS
+        ================================================= */}
+
         <button
           type="button"
           disabled={currentPage === 1}
@@ -85,22 +92,28 @@ export default function Pagination({
           <ChevronLeft size={15} />
         </button>
 
-        {/* Page Numbers */}
+        {/* =================================================
+            PAGE NUMBERS
+        ================================================= */}
+
         {pages.map((page, index) => {
+          // Ellipsis
           if (page === "...") {
             return (
               <span
                 key={`ellipsis-${index}`}
                 className="flex h-8 min-w-8 items-center justify-center px-1 text-xs font-semibold text-slate-400"
+                aria-hidden="true"
               >
                 ...
               </span>
             );
           }
 
+          // Page number
           return (
             <button
-              key={page}
+              key={`page-${page}`}
               type="button"
               onClick={() => onPageChange(page)}
               aria-current={currentPage === page ? "page" : undefined}
@@ -115,7 +128,10 @@ export default function Pagination({
           );
         })}
 
-        {/* Next */}
+        {/* =================================================
+            NEXT
+        ================================================= */}
+
         <button
           type="button"
           disabled={currentPage === totalPages}

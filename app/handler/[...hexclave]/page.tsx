@@ -1,5 +1,6 @@
-import { StackHandler } from "@hexclave/next/server";
+import { HexclaveHandler } from "@hexclave/next";
+import { hexclaveServerApp } from "@/hexclave/server";
 
 export default function Handler() {
-  return <StackHandler fullPage />;
+  return <HexclaveHandler app={hexclaveServerApp} fullPage />;
 }

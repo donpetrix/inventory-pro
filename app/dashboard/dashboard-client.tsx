@@ -62,6 +62,7 @@ type DashboardClientProps = {
   inventoryValue: number;
   allProducts: Product[];
   userName: string;
+  greeting: string;
 };
 
 export default function DashboardClient({
@@ -194,8 +195,7 @@ export default function DashboardClient({
               </p>
 
               <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                {greeting}
-                {userName}
+                {greeting} {userName}
               </h2>
 
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

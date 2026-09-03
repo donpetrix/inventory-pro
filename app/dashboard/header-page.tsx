@@ -46,7 +46,7 @@ export default function HeaderPage({
         {/*Mobile menu */}
 
         <button
-          onClick={() => setSidebarOpen(true)}
+          onClick={onMenuClick}
           className="rounded-xl border border-slate-200 bg-white p-2.5 text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
         >
           <Menu size={20} />

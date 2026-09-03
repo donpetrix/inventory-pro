@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,6 +15,7 @@ import {
   ShoppingCart,
   Users,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { UserButton } from "@hexclave/next";
 
@@ -22,7 +24,14 @@ type SidebarProps = {
   onClose?: () => void;
 };
 
-const mainNavigation = [
+type NavigationItem = {
+  name: string;
+  href: string;
+  icon: LucideIcon;
+  badge?: string | number;
+};
+
+const mainNavigation: NavigationItem[] = [
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -33,7 +42,6 @@ const mainNavigation = [
     href: "/inventory",
     icon: Package,
   },
-
   {
     name: "Add Product",
     href: "/add-product",
@@ -44,6 +52,7 @@ const mainNavigation = [
     href: "/settings",
     icon: Settings,
   },
+
   // {
   //   name: "Orders",
   //   href: "/dashboard/orders",
@@ -62,7 +71,7 @@ const mainNavigation = [
   // },
 ];
 
-const secondaryNavigation = [
+const secondaryNavigation: NavigationItem[] = [
   // {
   //   name: "Analytics",
   //   href: "/dashboard/analytics",
@@ -75,7 +84,7 @@ const secondaryNavigation = [
   // },
   // {
   //   name: "Settings",
-  //   href: "settings",
+  //   href: "/settings",
   //   icon: Settings,
   // },
 ];
@@ -87,6 +96,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
     if (href === "/dashboard") {
       return pathname === href;
     }
+
     return pathname.startsWith(href);
   };
 
@@ -123,7 +133,8 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
 
             <div>
               <h1 className="text-lg font-bold tracking-tight">
-                Inventory<span className="text-indigo-400">Pro</span>
+                Inventory
+                <span className="text-indigo-400">Pro</span>
               </h1>
 
               <p className="text-[9px] font-semibold tracking-[0.2em] text-slate-400">
@@ -133,7 +144,9 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
           </Link>
 
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close sidebar"
             className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
           >
             <X size={20} />
@@ -182,7 +195,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
                       text-sm font-medium transition-all
                       ${
                         active
-                          ? "bg-white text-slate-950 shadow-xl shadow-black/20 transition-all duration-300 hover:-translate-y-0.5 "
+                          ? "bg-white text-slate-950 shadow-xl shadow-black/20 transition-all duration-300 hover:-translate-y-0.5"
                           : "text-slate-400 hover:bg-white/5 hover:text-white"
                       }
                     `}
@@ -198,7 +211,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
 
                     <span>{item.name}</span>
 
-                    {item.badge && (
+                    {item.badge !== undefined && (
                       <span
                         className={`
                           ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold
@@ -253,7 +266,22 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
                       }
                     />
 
-                    {item.name}
+                    <span>{item.name}</span>
+
+                    {item.badge !== undefined && (
+                      <span
+                        className={`
+                          ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold
+                          ${
+                            active
+                              ? "bg-indigo-100 text-indigo-600"
+                              : "bg-white/10 text-slate-400"
+                          }
+                        `}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -277,7 +305,10 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
                 Unlock advanced analytics and unlimited features.
               </p>
 
-              <button className="mt-4 w-full rounded-xl bg-white py-2.5 text-xs font-bold text-indigo-600 transition hover:bg-indigo-50">
+              <button
+                type="button"
+                className="mt-4 w-full rounded-xl bg-white py-2.5 text-xs font-bold text-indigo-600 transition hover:bg-indigo-50"
+              >
                 Upgrade Now
               </button>
             </div>
@@ -288,19 +319,6 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         <div className="border-t border-white/10 p-4">
           <div className="flex items-center gap-3">
             <UserButton showUserInfo />
-
-            {/*<div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-bold">*/}
-            {/*  TP*/}
-            {/*</div>*/}
-
-            {/*<div className="min-w-0 flex-1">*/}
-            {/*  <p className="truncate text-sm font-semibold">Taiwo Peter</p>*/}
-            {/*  <p className="truncate text-xs text-slate-500">Administrator</p>*/}
-            {/*</div>*/}
-
-            {/*<button className="text-slate-500 transition hover:text-white">*/}
-            {/*  <LogOut size={17} />*/}
-            {/*</button>*/}
           </div>
         </div>
       </aside>

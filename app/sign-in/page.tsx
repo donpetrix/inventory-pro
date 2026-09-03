@@ -1,8 +1,17 @@
 import Link from "next/link";
 import { SignIn } from "@hexclave/next";
-import { SignedIn } from "@neondatabase/auth/react";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
 
-export default function Page() {
+export default async function Page() {
+  // Check the current authentication session
+  const user = await getCurrentUser();
+
+  // Automatically send authenticated users to dashboard
+  if (user) {
+    redirect("/dashboard");
+  }
+
   return (
     <main className="signin-page relative isolate min-h-screen overflow-hidden bg-slate-950">
       {/* Background gradient */}
@@ -33,7 +42,7 @@ export default function Page() {
             </span>
           </Link>
 
-          {/* Back Home */}
+          {/* Register */}
           <Link
             href="/sign-up"
             className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
@@ -61,7 +70,7 @@ export default function Page() {
           </div>
 
           {/* Sign In Card */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 shadow-2xl shadow-purple-950/20 backdrop-blur-xl sm:p-8 ">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-6 shadow-2xl shadow-purple-950/20 backdrop-blur-xl sm:p-8">
             <div className="flex items-center justify-center">
               <SignIn />
             </div>

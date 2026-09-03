@@ -6,15 +6,6 @@ export const stackClientApp = new StackClientApp({
   urls: {
     default: {
       type: "hosted",
-
-      signIn: "/sign-in",
-      signUp: "/sign-up",
-
-      afterSignIn: "/dashboard",
-      afterSignUp: "/dashboard",
-      afterSignOut: "/sign-in",
-
-      home: "/dashboard",
     },
   },
 });

@@ -1,9 +1,17 @@
 "use client";
+
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import {
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
 import { deleteProduct, updateProduct } from "@/app/actions/products";
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import Pagination from "@/components/pagination";
 
 import {
@@ -11,15 +19,12 @@ import {
   Bell,
   Boxes,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   DollarSign,
   Hash,
   MoreHorizontal,
   Package,
   Pencil,
   Search,
-  SlidersHorizontal,
   Trash2,
   X,
 } from "lucide-react";
@@ -27,7 +32,26 @@ import {
 import Sidebar from "@/components/sidebar";
 import HeaderPage from "@/app/dashboard/header-page";
 import FooterPage from "@/app/dashboard/footer-page";
-import ThemeToggle from "@/components/ThemeToggle";
+
+// =====================================================
+// PRODUCT TYPE
+// =====================================================
+
+type Product = {
+  id: string;
+  userid: string;
+  name: string;
+  sku: string | null;
+  price: number;
+  quantity: number;
+  lowStockAt: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// =====================================================
+// PROPS
+// =====================================================
 
 type InventoryClientProps = {
   totalProducts: number;
@@ -37,6 +61,10 @@ type InventoryClientProps = {
   allProducts: Product[];
   userName: string;
 };
+
+// =====================================================
+// COMPONENT
+// =====================================================
 
 export default function InventoryClient({
   totalProducts,
@@ -50,7 +78,10 @@ export default function InventoryClient({
 
   const router = useRouter();
 
-  //Delete Handler
+  // =================================================
+  // DELETE HANDLER
+  // =================================================
+
   const handleDelete = async (productId: string) => {
     const result = await deleteProduct(productId);
 
@@ -66,7 +97,6 @@ export default function InventoryClient({
       });
     }
   };
-  //End of Delete Handler
 
   // =================================================
   // INVENTORY SEARCH + PAGINATION
@@ -75,9 +105,12 @@ export default function InventoryClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const productsPerPage = 5;
+  const productsPerPage = 10;
 
-  // Search products
+  // =================================================
+  // SEARCH PRODUCTS
+  // =================================================
+
   const filteredProducts = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
 
@@ -90,13 +123,19 @@ export default function InventoryClient({
     );
   }, [allProducts, searchQuery]);
 
-  // Total pages
+  // =================================================
+  // TOTAL PAGES
+  // =================================================
+
   const totalPages = Math.max(
     1,
     Math.ceil(filteredProducts.length / productsPerPage),
   );
 
-  // Products for current page
+  // =================================================
+  // PRODUCTS FOR CURRENT PAGE
+  // =================================================
+
   const paginatedProducts = useMemo(() => {
     const startIndex = (currentPage - 1) * productsPerPage;
 
@@ -106,21 +145,22 @@ export default function InventoryClient({
   // =================================================
   // ACTION STATE FOR DELETE
   // =================================================
+
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+
   // =================================================
-  // ACTION STATE
+  // DELETE RESULT DIALOG
   // =================================================
 
-  //Show Delete Result Dialog
   const [deleteResult, setDeleteResult] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
-  //End of Action Code
 
   // =================================================
   // ACTION STATE FOR UPDATE
   // =================================================
+
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const [editLoading, setEditLoading] = useState(false);
@@ -134,16 +174,10 @@ export default function InventoryClient({
   });
 
   // =================================================
-  // ACTION STATE
+  // UPDATE SUCCESS DIALOG
   // =================================================
 
-  // =================================================
-  // ACTION STATE FOR UPDATE
-  // =================================================
   const [updateSuccessDialogOpen, setUpdateSuccessDialogOpen] = useState(false);
-  // =================================================
-  // ACTION STATE
-  // =================================================
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -154,19 +188,28 @@ export default function InventoryClient({
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="lg:pl-72">
+        {/* =====================================================
+            HEADER
+        ===================================================== */}
+
         <HeaderPage
           title="Dashboard"
           description="Here's what's happening with your inventory today."
           onMenuClick={() => setSidebarOpen(true)}
         />
-        {/*// ================================================= // INVENTORY //*/}
-        {/*=================================================*/}
+
+        {/* =====================================================
+            INVENTORY
+        ===================================================== */}
+
         <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {/* =================================================
-    INVENTORY TOOLBAR
-================================================= */}
+              INVENTORY TOOLBAR
+          ================================================= */}
+
           <div className="relative overflow-hidden border-b border-slate-200/80 dark:border-slate-800">
             {/* Subtle background glow */}
+
             <div
               aria-hidden="true"
               className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl"
@@ -180,15 +223,17 @@ export default function InventoryClient({
             <div className="relative px-5 py-6 sm:px-6">
               <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
                 {/* =================================================
-          INVENTORY IDENTITY
-      ================================================= */}
+                    INVENTORY IDENTITY
+                ================================================= */}
 
                 <div className="flex items-center gap-4">
                   {/* Icon */}
+
                   <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20">
                     <Package size={22} strokeWidth={2} />
 
                     {/* Online indicator */}
+
                     <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900">
                       <span className="h-1.5 w-1.5 rounded-full bg-white" />
                     </span>
@@ -212,21 +257,18 @@ export default function InventoryClient({
                 </div>
 
                 {/* =================================================
-          SEARCH + ACTIONS
-      ================================================= */}
+                    SEARCH
+                ================================================= */}
 
                 <div className="flex w-full flex-col gap-2 sm:flex-row xl:w-auto">
-                  {/* Search */}
                   <div className="group relative w-full sm:w-80 xl:w-96">
                     <div className="flex h-11 items-center gap-3 rounded-full border border-slate-200 bg-slate-50/70 px-5 transition-all duration-200 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:bg-slate-800">
-                      {/* Search Icon */}
                       <Search
                         size={17}
                         strokeWidth={2}
                         className="shrink-0 text-slate-400"
                       />
 
-                      {/* Input */}
                       <input
                         type="text"
                         placeholder="Search products, SKU..."
@@ -243,13 +285,15 @@ export default function InventoryClient({
               </div>
 
               {/* =================================================
-        QUICK INVENTORY SUMMARY
-    ================================================= */}
+                  QUICK INVENTORY SUMMARY
+              ================================================= */}
 
               <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
                 {/* In Stock */}
+
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+
                   <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                     In Stock:{" "}
                     {
@@ -263,8 +307,10 @@ export default function InventoryClient({
                 </div>
 
                 {/* Low Stock */}
+
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+
                   <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                     Low Stock:{" "}
                     {
@@ -278,8 +324,10 @@ export default function InventoryClient({
                 </div>
 
                 {/* Out of Stock */}
+
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
+
                   <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                     Out of Stock:{" "}
                     {
@@ -291,9 +339,11 @@ export default function InventoryClient({
                 </div>
 
                 {/* Divider */}
+
                 <div className="hidden h-4 w-px bg-slate-200 sm:block dark:bg-slate-700" />
 
                 {/* Matching Products */}
+
                 <span className="text-[11px] font-medium text-slate-400">
                   {filteredProducts.length} matching products
                 </span>
@@ -302,8 +352,9 @@ export default function InventoryClient({
           </div>
 
           {/* =================================================
-      INVENTORY TABLE
-  ================================================= */}
+              INVENTORY TABLE
+          ================================================= */}
+
           {paginatedProducts.length === 0 ? (
             <div className="px-5 py-16 text-center">
               <Package className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-700" />
@@ -320,6 +371,7 @@ export default function InventoryClient({
             <div className="overflow-x-auto">
               <table className="w-full min-w-[800px] text-left">
                 {/* Table Header */}
+
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
                     <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -347,6 +399,7 @@ export default function InventoryClient({
                 </thead>
 
                 {/* Table Body */}
+
                 <tbody>
                   {paginatedProducts.map((product) => {
                     const isOutOfStock = product.quantity === 0;
@@ -361,6 +414,7 @@ export default function InventoryClient({
                         className="border-b border-slate-100 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
                       >
                         {/* Product */}
+
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400">
@@ -382,11 +436,13 @@ export default function InventoryClient({
                         </td>
 
                         {/* SKU */}
+
                         <td className="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">
                           {product.sku ?? "—"}
                         </td>
 
                         {/* Price */}
+
                         <td className="px-5 py-4 text-sm font-bold text-slate-900 dark:text-white">
                           $
                           {Number(product.price).toLocaleString(undefined, {
@@ -396,11 +452,13 @@ export default function InventoryClient({
                         </td>
 
                         {/* Quantity */}
+
                         <td className="px-5 py-4 text-sm font-semibold text-slate-700 dark:text-slate-300">
                           {product.quantity}
                         </td>
 
                         {/* Status */}
+
                         <td className="px-5 py-4">
                           {isOutOfStock ? (
                             <span className="inline-flex rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-600 dark:bg-red-500/10 dark:text-red-400">
@@ -418,12 +476,12 @@ export default function InventoryClient({
                         </td>
 
                         {/* Actions */}
+
                         <td className="px-5 py-4 text-right">
                           <Menu
                             as="div"
                             className="relative inline-block text-left"
                           >
-                            {/* Action ... Button */}
                             <MenuButton
                               aria-label={`Actions for ${product.name}`}
                               className="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none data-focus:outline-none data-hover:bg-slate-100 data-open:bg-slate-100 dark:text-slate-400 dark:data-hover:bg-slate-800 dark:data-open:bg-slate-800 dark:data-hover:text-slate-200 dark:data-open:text-slate-200"
@@ -431,13 +489,13 @@ export default function InventoryClient({
                               <MoreHorizontal size={18} strokeWidth={2} />
                             </MenuButton>
 
-                            {/* Dropdown */}
                             <MenuItems
                               transition
                               anchor="bottom end"
                               className="z-50 w-36 origin-top-right rounded-xl border border-slate-200 bg-white p-1.5 text-sm shadow-xl shadow-slate-200/50 outline-none transition duration-100 ease-out [--anchor-gap:--spacing(1.5)] data-closed:scale-95 data-closed:opacity-0 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/30"
                             >
                               {/* Edit */}
+
                               <MenuItem>
                                 <button
                                   type="button"
@@ -473,9 +531,11 @@ export default function InventoryClient({
                               </MenuItem>
 
                               {/* Divider */}
+
                               <div className="my-1 h-px bg-slate-100 dark:bg-slate-800" />
 
                               {/* Delete */}
+
                               <MenuItem>
                                 <button
                                   type="button"
@@ -505,9 +565,10 @@ export default function InventoryClient({
                   })}
                 </tbody>
               </table>
+
               {/* =====================================================
-    EDIT PRODUCT DIALOG
-===================================================== */}
+                  EDIT PRODUCT DIALOG
+              ===================================================== */}
 
               <Dialog
                 open={editingProduct !== null}
@@ -519,15 +580,18 @@ export default function InventoryClient({
                 className="relative z-[100]"
               >
                 {/* Backdrop */}
+
                 <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm" />
 
                 {/* Dialog */}
+
                 <div className="fixed inset-0 flex items-center justify-center overflow-y-auto p-4">
                   <DialogPanel
                     transition
-                    className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/10 duration-200 ease-out data-closed:scale-95 data-closed:opacity-0 dark:border-slate-700 dark:bg-slate-900"
+                    className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/10 duration-200 ease-out data-closed:scale-95 data-closed:opacity-0 dark:border-slate-700 dark:bg-slate-900"
                   >
                     {/* Header */}
+
                     <div className="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
                       <div className="flex items-center justify-between">
                         <div>
@@ -553,6 +617,7 @@ export default function InventoryClient({
                     </div>
 
                     {/* Form */}
+
                     <form
                       onSubmit={async (e) => {
                         e.preventDefault();
@@ -560,7 +625,9 @@ export default function InventoryClient({
                         if (!editingProduct) return;
 
                         const name = editFormData.name.trim();
+
                         const price = Number(editFormData.price);
+
                         const quantity = Number(editFormData.quantity);
 
                         const lowStockAt = editFormData.lowStockAt
@@ -568,6 +635,7 @@ export default function InventoryClient({
                           : null;
 
                         // Validation
+
                         if (!name) {
                           alert("Product name is required.");
                           return;
@@ -618,12 +686,15 @@ export default function InventoryClient({
                           }
 
                           // Close edit dialog
+
                           setEditingProduct(null);
 
                           // Show success dialog
+
                           setUpdateSuccessDialogOpen(true);
 
                           // Refresh inventory
+
                           router.refresh();
                         } catch (error) {
                           console.error("Edit product error:", error);
@@ -638,8 +709,9 @@ export default function InventoryClient({
                         }
                       }}
                     >
-                      <div className="mt-5 mb-6 space-y-5 px-6">
+                      <div className="mb-6 mt-5 space-y-5 px-6">
                         {/* Product Name */}
+
                         <div>
                           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                             Product name
@@ -652,10 +724,13 @@ export default function InventoryClient({
                                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                               />
                             </div>
+
                             <input
                               type="text"
                               value={editFormData.name}
-                              style={{ paddingLeft: "48px" }}
+                              style={{
+                                paddingLeft: "48px",
+                              }}
                               onChange={(e) =>
                                 setEditFormData((prev) => ({
                                   ...prev,
@@ -669,6 +744,7 @@ export default function InventoryClient({
                         </div>
 
                         {/* SKU */}
+
                         <div>
                           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                             SKU
@@ -681,11 +757,14 @@ export default function InventoryClient({
                                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                               />
                             </div>
+
                             <input
                               type="text"
                               value={editFormData.sku}
                               readOnly
-                              style={{ paddingLeft: "48px" }}
+                              style={{
+                                paddingLeft: "48px",
+                              }}
                               className="h-11 w-full rounded-lg border border-slate-200 bg-slate-100 pl-11 pr-4 text-sm text-slate-500 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
                             />
                           </div>
@@ -696,8 +775,10 @@ export default function InventoryClient({
                         </div>
 
                         {/* Price + Quantity */}
+
                         <div className="grid gap-4 sm:grid-cols-2">
                           {/* Price */}
+
                           <div>
                             <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                               Price
@@ -710,12 +791,15 @@ export default function InventoryClient({
                                   className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                                 />
                               </div>
+
                               <input
                                 type="number"
                                 min="0"
                                 step="0.01"
                                 value={editFormData.price}
-                                style={{ paddingLeft: "48px" }}
+                                style={{
+                                  paddingLeft: "48px",
+                                }}
                                 onChange={(e) =>
                                   setEditFormData((prev) => ({
                                     ...prev,
@@ -728,6 +812,7 @@ export default function InventoryClient({
                           </div>
 
                           {/* Quantity */}
+
                           <div>
                             <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                               Quantity
@@ -740,11 +825,14 @@ export default function InventoryClient({
                                   className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                                 />
                               </div>
+
                               <input
                                 type="number"
                                 min="0"
                                 step="1"
-                                style={{ paddingLeft: "48px" }}
+                                style={{
+                                  paddingLeft: "48px",
+                                }}
                                 value={editFormData.quantity}
                                 onChange={(e) =>
                                   setEditFormData((prev) => ({
@@ -759,6 +847,7 @@ export default function InventoryClient({
                         </div>
 
                         {/* Low Stock */}
+
                         <div>
                           <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
                             Low stock threshold
@@ -771,11 +860,14 @@ export default function InventoryClient({
                                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                               />
                             </div>
+
                             <input
                               type="number"
                               min="0"
                               step="1"
-                              style={{ paddingLeft: "48px" }}
+                              style={{
+                                paddingLeft: "48px",
+                              }}
                               value={editFormData.lowStockAt}
                               onChange={(e) =>
                                 setEditFormData((prev) => ({
@@ -795,6 +887,7 @@ export default function InventoryClient({
                       </div>
 
                       {/* Footer */}
+
                       <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-5 dark:border-slate-800">
                         <button
                           type="button"
@@ -819,12 +912,8 @@ export default function InventoryClient({
               </Dialog>
 
               {/* =====================================================
-    EDIT PRODUCT DIALOG
-===================================================== */}
-
-              {/* =====================================================
-    UPDATE SUCCESS DIALOG
-===================================================== */}
+                  UPDATE SUCCESS DIALOG
+              ===================================================== */}
 
               <Dialog
                 open={updateSuccessDialogOpen}
@@ -832,20 +921,22 @@ export default function InventoryClient({
                 className="relative z-[110]"
               >
                 {/* Backdrop */}
+
                 <div
                   className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm"
                   aria-hidden="true"
                 />
 
                 {/* Dialog container */}
+
                 <div className="fixed inset-0 flex items-center justify-center p-4">
                   <DialogPanel
                     transition
                     className="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/20 duration-200 ease-out data-closed:scale-95 data-closed:opacity-0 dark:border-slate-700 dark:bg-slate-900"
                   >
-                    {/* Content */}
                     <div className="px-6 py-7 text-center">
                       {/* Success Icon */}
+
                       <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/10">
                         <CheckCircle2
                           size={30}
@@ -854,17 +945,20 @@ export default function InventoryClient({
                       </div>
 
                       {/* Title */}
+
                       <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
                         Updated successfully
                       </DialogTitle>
 
                       {/* Message */}
+
                       <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                         Your product information has been updated successfully.
                       </p>
                     </div>
 
                     {/* Button */}
+
                     <div className="border-t border-slate-200 px-6 py-4 dark:border-slate-800">
                       <button
                         type="button"
@@ -878,22 +972,28 @@ export default function InventoryClient({
                 </div>
               </Dialog>
 
-              {/*//Comfirm Dialog*/}
+              {/* =====================================================
+                  DELETE CONFIRMATION DIALOG
+              ===================================================== */}
+
               <Dialog
                 open={deletingProduct !== null}
                 onClose={() => setDeletingProduct(null)}
                 className="relative z-[100]"
               >
                 {/* Backdrop */}
+
                 <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm" />
 
                 {/* Dialog Position */}
+
                 <div className="fixed inset-0 flex items-center justify-center p-4">
                   <DialogPanel
                     transition
                     className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-950/10 duration-200 ease-out data-closed:scale-95 data-closed:opacity-0 dark:border-slate-700 dark:bg-slate-900"
                   >
                     {/* Icon */}
+
                     <div className="flex items-start justify-between">
                       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10">
                         <Trash2
@@ -914,6 +1014,7 @@ export default function InventoryClient({
                     </div>
 
                     {/* Content */}
+
                     <div className="mt-4">
                       <DialogTitle className="text-base font-semibold text-slate-900 dark:text-white">
                         Delete product?
@@ -929,6 +1030,7 @@ export default function InventoryClient({
                     </div>
 
                     {/* Actions */}
+
                     <div className="mt-6 flex justify-end gap-2.5">
                       <button
                         type="button"
@@ -958,29 +1060,33 @@ export default function InventoryClient({
                   </DialogPanel>
                 </div>
               </Dialog>
+
               {/* =====================================================
-    DELETE RESULT DIALOG
-===================================================== */}
+                  DELETE RESULT DIALOG
+              ===================================================== */}
+
               <Dialog
                 open={deleteResult !== null}
                 onClose={() => setDeleteResult(null)}
                 className="relative z-[110]"
               >
                 {/* Backdrop */}
+
                 <div className="fixed inset-0 bg-slate-950/30 backdrop-blur-sm" />
 
                 {/* Dialog Container */}
+
                 <div className="fixed inset-0 flex items-center justify-center p-4">
                   <DialogPanel
                     transition
                     className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-2xl shadow-slate-950/10 outline-none transition duration-200 ease-out data-closed:scale-95 data-closed:opacity-0 dark:border-slate-700 dark:bg-slate-900"
                   >
-                    {/* Only render content when deleteResult exists */}
                     {deleteResult && (
                       <>
                         {deleteResult.type === "success" ? (
                           <>
                             {/* Success Icon */}
+
                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/10">
                               <CheckCircle2
                                 size={25}
@@ -990,16 +1096,19 @@ export default function InventoryClient({
                             </div>
 
                             {/* Title */}
+
                             <DialogTitle className="mt-4 text-base font-semibold text-slate-900 dark:text-white">
                               Product deleted
                             </DialogTitle>
 
                             {/* Message */}
+
                             <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                               {deleteResult.message}
                             </p>
 
                             {/* Success Button */}
+
                             <button
                               type="button"
                               onClick={() => setDeleteResult(null)}
@@ -1011,6 +1120,7 @@ export default function InventoryClient({
                         ) : (
                           <>
                             {/* Error Icon */}
+
                             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10">
                               <AlertCircle
                                 size={25}
@@ -1020,16 +1130,19 @@ export default function InventoryClient({
                             </div>
 
                             {/* Title */}
+
                             <DialogTitle className="mt-4 text-base font-semibold text-slate-900 dark:text-white">
                               Delete failed
                             </DialogTitle>
 
                             {/* Message */}
+
                             <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                               {deleteResult.message}
                             </p>
 
                             {/* Error Button */}
+
                             <button
                               type="button"
                               onClick={() => setDeleteResult(null)}
@@ -1044,9 +1157,12 @@ export default function InventoryClient({
                   </DialogPanel>
                 </div>
               </Dialog>
-              {/*// End of Result Dialog*/}
             </div>
           )}
+
+          {/* =====================================================
+              PAGINATION
+          ===================================================== */}
 
           <Pagination
             currentPage={currentPage}
@@ -1056,6 +1172,11 @@ export default function InventoryClient({
             onPageChange={setCurrentPage}
           />
         </section>
+
+        {/* =====================================================
+            FOOTER
+        ===================================================== */}
+
         <main className="p-4 sm:p-6 lg:p-8">
           <FooterPage />
         </main>

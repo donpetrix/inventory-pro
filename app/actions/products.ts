@@ -10,6 +10,31 @@ import { getCurrentUser } from "@/lib/auth";
 
 export async function deleteProduct(productId: string) {
   try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return {
+        success: false,
+        message: "You must be signed in.",
+      };
+    }
+
+    // Make sure the product belongs to the authenticated user
+    const existingProduct = await prisma.product.findFirst({
+      where: {
+        id: productId,
+        userid: user.id,
+      },
+    });
+
+    if (!existingProduct) {
+      return {
+        success: false,
+        message:
+          "Product not found or you do not have permission to delete it.",
+      };
+    }
+
     await prisma.product.delete({
       where: {
         id: productId,
@@ -38,6 +63,10 @@ export async function deleteProduct(productId: string) {
 // =====================================================
 
 export async function addProduct(formData: FormData) {
+  // -------------------------------------------------
+  // Get authenticated user
+  // -------------------------------------------------
+
   const user = await getCurrentUser();
 
   if (!user) {
@@ -81,6 +110,26 @@ export async function addProduct(formData: FormData) {
       return {
         success: false,
         message: "Product name cannot exceed 100 characters.",
+      };
+    }
+
+    // -------------------------------------------------
+    // Validate SKU
+    // -------------------------------------------------
+
+    if (!sku) {
+      return {
+        success: false,
+        message: "SKU is required.",
+        field: "sku",
+      };
+    }
+
+    if (sku.length > 50) {
+      return {
+        success: false,
+        message: "SKU cannot exceed 50 characters.",
+        field: "sku",
       };
     }
 
@@ -148,22 +197,12 @@ export async function addProduct(formData: FormData) {
     }
 
     // -------------------------------------------------
-    // Get current user
+    // Check if SKU already exists
     // -------------------------------------------------
 
-    const user = await getCurrentUser();
-
-    if (!user) {
-      return {
-        success: false,
-        message: "You must be logged in to add a product.",
-      };
-    }
-
-    // Check if SKU already exists
     const existingProduct = await prisma.product.findFirst({
       where: {
-        sku: sku.trim(),
+        sku,
       },
     });
 
@@ -174,6 +213,7 @@ export async function addProduct(formData: FormData) {
         field: "sku",
       };
     }
+
     // -------------------------------------------------
     // Create product
     // -------------------------------------------------
@@ -182,7 +222,7 @@ export async function addProduct(formData: FormData) {
       data: {
         userid: user.id,
         name,
-        sku: sku || null,
+        sku,
         price,
         quantity,
         lowStockAt,
@@ -219,7 +259,10 @@ export async function addProduct(formData: FormData) {
   }
 }
 
-//Update Product
+// =====================================================
+// UPDATE PRODUCT
+// =====================================================
+
 export async function updateProduct(
   productId: string,
   data: {
@@ -231,7 +274,10 @@ export async function updateProduct(
   },
 ) {
   try {
-    // Get authenticated user on the server
+    // -------------------------------------------------
+    // Get authenticated user
+    // -------------------------------------------------
+
     const user = await getCurrentUser();
 
     if (!user) {
@@ -241,7 +287,10 @@ export async function updateProduct(
       };
     }
 
-    // Make sure the product belongs to the authenticated user
+    // -------------------------------------------------
+    // Make sure the product belongs to the user
+    // -------------------------------------------------
+
     const existingProduct = await prisma.product.findFirst({
       where: {
         id: productId,
@@ -256,14 +305,91 @@ export async function updateProduct(
       };
     }
 
+    // -------------------------------------------------
+    // Validate update data
+    // -------------------------------------------------
+
+    const name = data.name.trim();
+    const sku = data.sku.trim();
+
+    if (!name) {
+      return {
+        success: false,
+        message: "Product name is required.",
+      };
+    }
+
+    if (!sku) {
+      return {
+        success: false,
+        message: "SKU is required.",
+        field: "sku",
+      };
+    }
+
+    if (!Number.isFinite(data.price) || data.price <= 0) {
+      return {
+        success: false,
+        message: "Price must be greater than 0.",
+      };
+    }
+
+    if (!Number.isInteger(data.quantity) || data.quantity < 0) {
+      return {
+        success: false,
+        message: "Quantity must be a valid whole number.",
+      };
+    }
+
+    if (
+      data.lowStockAt !== null &&
+      (!Number.isInteger(data.lowStockAt) || data.lowStockAt < 0)
+    ) {
+      return {
+        success: false,
+        message: "Low-stock threshold must be a valid whole number.",
+      };
+    }
+
+    if (data.lowStockAt !== null && data.lowStockAt > data.quantity) {
+      return {
+        success: false,
+        message: "Low-stock threshold cannot be greater than quantity.",
+      };
+    }
+
+    // -------------------------------------------------
+    // Check SKU uniqueness
+    // -------------------------------------------------
+
+    const skuExists = await prisma.product.findFirst({
+      where: {
+        sku,
+        id: {
+          not: productId,
+        },
+      },
+    });
+
+    if (skuExists) {
+      return {
+        success: false,
+        message: `A product with SKU "${sku}" already exists.`,
+        field: "sku",
+      };
+    }
+
+    // -------------------------------------------------
     // Update product
+    // -------------------------------------------------
+
     const product = await prisma.product.update({
       where: {
         id: productId,
       },
       data: {
-        name: data.name,
-        sku: data.sku,
+        name,
+        sku,
         price: data.price,
         quantity: data.quantity,
         lowStockAt: data.lowStockAt,
@@ -271,6 +397,13 @@ export async function updateProduct(
     });
 
     console.log("Product updated successfully:", product.id);
+
+    // -------------------------------------------------
+    // Refresh pages
+    // -------------------------------------------------
+
+    revalidatePath("/dashboard");
+    revalidatePath("/inventory");
 
     return {
       success: true,
